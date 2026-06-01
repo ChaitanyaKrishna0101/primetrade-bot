@@ -1,3 +1,13 @@
+---
+title: PrimeTrade Bot
+emoji: 🤖
+colorFrom: yellow
+colorTo: green
+sdk: docker
+pinned: false
+
+---
+
 # 🤖 PrimeTrade Bot
 
 > A professional-grade crypto trading bot built on Binance Testnet — with a CLI, a polished web UI, AI-powered trade analysis, structured logging, Docker support, and a full test suite.
