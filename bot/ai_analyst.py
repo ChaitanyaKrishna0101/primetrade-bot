@@ -1,5 +1,5 @@
 """
-AI-powered market analysis using Google Gemini.
+AI-powered market analysis using Groq (llama-3.3-70b-versatile).
 Provides trade signal reasoning, risk assessment, and
 market context before order placement.
 
@@ -17,28 +17,43 @@ from .logging_config import get_logger
 
 logger = get_logger("ai_analyst")
 
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
-def _call_gemini(prompt: str, api_key: str) -> str:
-    """Raw Gemini API call. Returns the text content."""
-    headers = {"Content-Type": "application/json"}
+def _call_groq(prompt: str, api_key: str) -> str:
+    """Raw Groq API call. Returns the text content."""
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
     body = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1024},
+        "model": GROQ_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a professional crypto futures trader acting as a pre-trade risk analyst. Always respond with valid JSON only — no markdown, no explanation outside the JSON object.",
+            },
+            {
+                "role": "user",
+                "content": prompt,
+            },
+        ],
+        "temperature": 0.2,
+        "max_tokens": 1024,
     }
     try:
         resp = httpx.post(
-            f"{GEMINI_API_URL}?key={api_key}",
+            GROQ_API_URL,
             json=body,
             headers=headers,
             timeout=15.0,
         )
         resp.raise_for_status()
         data = resp.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+        return data["choices"][0]["message"]["content"]
     except Exception as exc:
-        logger.warning(f"Gemini API call failed: {exc}")
+        logger.warning(f"Groq API call failed: {exc}")
         return ""
 
 
@@ -52,16 +67,17 @@ def analyse_trade(
     klines: Optional[list] = None,
 ) -> dict:
     """
-    Ask Gemini to reason about the trade before execution.
+    Ask Groq to reason about the trade before execution.
     Returns a structured dict with:
       - risk_level: LOW / MEDIUM / HIGH
       - signal_strength: 0-100
       - reasoning: plain-English explanation
       - recommendation: PROCEED / CAUTION / ABORT
+      - key_risks: list of risks
     """
-    api_key = os.getenv("GEMINI_API_KEY", "")
+    api_key = os.getenv("GROQ_API_KEY", "")
     if not api_key:
-        logger.info("GEMINI_API_KEY not set — skipping AI analysis")
+        logger.info("GROQ_API_KEY not set — skipping AI analysis")
         return {}
 
     # Build a compact market context summary from klines
@@ -79,8 +95,6 @@ def analyse_trade(
         )
 
     prompt = f"""
-You are a professional crypto futures trader acting as a pre-trade risk analyst.
-
 TRADE INTENT:
 - Symbol: {symbol}
 - Side: {side}
@@ -90,27 +104,27 @@ TRADE INTENT:
 - Current Market Price: {current_price if current_price else 'unknown'}
 {f'- Market Context: {price_context}' if price_context else ''}
 
-Analyse this trade and respond ONLY with a valid JSON object (no markdown, no explanation outside JSON):
+Analyse this trade and respond ONLY with a valid JSON object:
 {{
   "risk_level": "LOW" | "MEDIUM" | "HIGH",
   "signal_strength": <integer 0-100>,
   "reasoning": "<2-3 sentence plain-English assessment>",
   "recommendation": "PROCEED" | "CAUTION" | "ABORT",
-  "key_risks": ["<risk1>"]
+  "key_risks": ["<risk1>", "<risk2>"]
 }}
 
 Be concise, factual, and objective. Base risk_level on price distance from market, order size context, and order type.
 """
 
-    logger.info("Requesting AI trade analysis from Gemini")
-    raw = _call_gemini(prompt, api_key)
+    logger.info("Requesting AI trade analysis from Groq")
+    raw = _call_groq(prompt, api_key)
 
     if not raw:
         return {}
 
     try:
         clean = raw.strip()
-        # Strip markdown fences
+        # Strip markdown fences if present
         if "```" in clean:
             clean = clean.split("```")[1]
             if clean.startswith("json"):
@@ -122,7 +136,7 @@ Be concise, factual, and objective. Base risk_level on price distance from marke
             clean = clean[start:end]
         return json.loads(clean.strip())
     except json.JSONDecodeError:
-        logger.warning("Could not parse Gemini response as JSON")
+        logger.warning("Could not parse Groq response as JSON")
         return {"reasoning": raw[:300], "recommendation": "CAUTION"}
 
 

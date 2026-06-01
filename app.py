@@ -673,7 +673,7 @@ python cli.py monitor --symbol BTCUSDT --refresh 5</pre>
     <div class="ai-header">
       <span style="font-size:1rem">⚡</span>
       <span class="ai-label">AI Analysis</span>
-      <span class="ai-chip">GEMINI</span>
+      <span class="ai-chip">GROQ</span>
     </div>
     <div class="ai-body scrollable" id="ai-body">
       <div class="empty-state" style="height:100%;min-height:200px">
