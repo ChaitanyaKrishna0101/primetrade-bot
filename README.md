@@ -40,6 +40,25 @@ PrimeTrade Bot solves all four.
 
 ---
 
+## 📸 Snapshots
+
+### 🖥️ Interface & Market Data
+| Market Price | Account Balances | BUY Market (Filled) |
+|:------------:|:----------------:|:-------------------:|
+| ![Market Price](https://github.com/user-attachments/assets/84c0dd4c-64fc-4483-852a-f1d9ae67d4bc) | ![Account Balances](https://github.com/user-attachments/assets/6b1d5339-6acd-432d-8009-f59aca40cc17) | ![BUY Market](https://github.com/user-attachments/assets/53b958ce-5faf-48fe-9532-ff6a15e22e3d) |
+
+### 📤 Order Placement
+| SELL Market (Filled) | BUY Limit (New) | SELL Limit (New) |
+|:--------------------:|:---------------:|:----------------:|
+| ![SELL Market](https://github.com/user-attachments/assets/51c5ea3e-6790-4e4d-82a9-700a8eff730d) | ![BUY Limit](https://github.com/user-attachments/assets/0ccaf76f-3818-430f-9bf3-02c6df626221) | ![SELL Limit](https://github.com/user-attachments/assets/3d7a1bcd-99c7-4949-b41c-05be6dce9809) |
+
+### 📋 Order Management & Features
+| Open Orders | Error Handling | Help Tab |
+|:-----------:|:--------------:|:--------:|
+| ![Open Orders](https://github.com/user-attachments/assets/e9647351-2cd2-404c-81f1-88caae8a398c) | ![Error Handling](https://github.com/user-attachments/assets/5a7c7a8c-35b8-45f8-affa-0c813dc38f42) | ![Help Tab](https://github.com/user-attachments/assets/bd3c910c-248e-421a-a9a1-cf5f9755397d) |
+
+---
+
 ## ✨ Features
 
 | Feature | Description |
